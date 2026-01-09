@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MindRebus - The Rebus Puzzle Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              apple: {
+                gray: '#F5F5F7',
+                dark: '#1D1D1F',
+                blue: '#0071E3',
+                red: '#FF3B30',
+                green: '#34C759',
+                yellow: '#FFD60A',
+              }
+            },
+            animation: {
+              'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+              'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              'portal-zoom': 'portal-zoom 2s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+              'float': 'float 3s ease-in-out infinite',
+              'tunnel': 'tunnel 3s linear infinite',
+              'spin-slow': 'spin 8s linear infinite',
+              'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+              'scan': 'scan 4s linear infinite',
+            },
+            keyframes: {
+              shake: {
+                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+              },
+              pop: {
+                '0%': { transform: 'scale(0.9)', opacity: 0 },
+                '100%': { transform: 'scale(1)', opacity: 1 }
+              },
+              'portal-zoom': {
+                '0%': { transform: 'scale(0.5) rotate(0deg)', opacity: 0, filter: 'blur(10px)' },
+                '20%': { transform: 'scale(1) rotate(0deg)', opacity: 1, filter: 'blur(0px)' },
+                '80%': { transform: 'scale(1.2) rotate(5deg)', opacity: 1, filter: 'blur(0px)' },
+                '100%': { transform: 'scale(10) rotate(15deg)', opacity: 0, filter: 'blur(20px)' }
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' }
+              },
+              tunnel: {
+                '0%': { transform: 'scale(0.1)', opacity: 0 },
+                '50%': { opacity: 0.5 },
+                '100%': { transform: 'scale(2)', opacity: 0 }
+              },
+              'pulse-glow': {
+                '0%, 100%': { opacity: '0.4', filter: 'drop-shadow(0 0 5px rgba(0, 113, 227, 0.3))' },
+                '50%': { opacity: '0.9', filter: 'drop-shadow(0 0 15px rgba(0, 113, 227, 0.7))' }
+              },
+              scan: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+      .dark ::-webkit-scrollbar-thumb { background: #4B5563; }
+
+      .cinematic-flash {
+        position: fixed;
+        inset: 0;
+        background: white;
+        z-index: 200;
+        pointer-events: none;
+        opacity: 0;
+        animation: flash 0.8s ease-out forwards;
+      }
+
+      @keyframes flash {
+        0% { opacity: 0; }
+        10% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+
+      .tunnel-ring {
+        position: absolute;
+        border: 2px solid rgba(0, 113, 227, 0.3);
+        border-radius: 50%;
+        animation: tunnel 3s linear infinite;
+      }
+
+      .glow-path {
+        filter: drop-shadow(0 0 8px rgba(0, 113, 227, 0.6));
+      }
+
+      .bg-space-light {
+        background: radial-gradient(circle at top, #ffffff 0%, #f0f4f8 100%);
+      }
+      .dark .bg-space-dark {
+        background: radial-gradient(circle at top, #0a0a0c 0%, #000000 100%);
+      }
+
+      .stars {
+        background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                          radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                          radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+                          radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+                          radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+                          radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+        background-repeat: repeat;
+        background-size: 200px 200px;
+        opacity: 0.1;
+      }
+      .dark .stars { opacity: 0.4; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.1/client",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/jsx-runtime": "https://aistudiocdn.com/react@^19.2.1/jsx-runtime",
+    "react/jsx-dev-runtime": "https://aistudiocdn.com/react@^19.2.1/jsx-dev-runtime",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-apple-gray dark:bg-black text-slate-900 dark:text-white transition-colors duration-300 overflow-x-hidden">
+    <div id="root"></div>
+  </body>
+</html>
